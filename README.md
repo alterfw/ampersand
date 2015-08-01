@@ -27,23 +27,24 @@ Route::get('user/:id', function($user_id){
 
 Ampersand uses [Twig](http://twig.sensiolabs.org/) to render templates.
 
-You can set `views` folder and `cache` property to Twig via Ampersand:
-
-```php
-<?php
-
-$Ampersand = new Ampersand();
-$Ampersand->set('cache', false);
-```
-
-And render templates using routes:
+You render templates using routes:
 
 ```php
 <?php
 Route::get('hello/:name', function($name){
-  render('hello', ['name' => $name]); // will render views/hello.html
+  Render::template('hello', ['name' => $name]); // will render views/hello.html
 })
 ```
+
+Or just render a json:
+
+```php
+<?php
+Route::get('hello/:name', function($name){
+  Render::json('hello', ['name' => $name]); // will render views/hello.html
+})
+```
+
 
 You can also use layouts and template blocks, read more in [Twig documentation](http://twig.sensiolabs.org/documentation).
 

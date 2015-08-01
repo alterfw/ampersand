@@ -23,7 +23,8 @@
       "Amperstand\\": "src/"
     },
     "files": [
-      "src/router.php"
+      "src/router.php",
+      "src/renderer.php"
     ]
   }
 }
