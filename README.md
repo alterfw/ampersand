@@ -1,8 +1,6 @@
 & (ampersand)
 =============
 
-<img height="260" src="http://www.variousandsundry.com/cs/images/ampersand_monkey.png" alt="Ampersand, Yorick's monkey">
-
 A microframework for Wordpress (in initial development)
 
 ## Routes
