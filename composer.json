@@ -17,6 +17,7 @@
       "Amperstand\\": "src/"
     },
     "files": [
+      "src/main.php",
       "src/router.php",
       "src/renderer.php"
     ]
