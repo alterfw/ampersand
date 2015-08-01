@@ -8,12 +8,6 @@
       "email": "sergiovilar.r@gmail.com"
     }
   ],
-  "repositories": [
-    {
-      "url": "git@github.com:alterfw/WP-Router.git",
-      "type": "git"
-    }
-  ],
   "minimum-stability": "dev",
   "require": {
     "twig/twig": "~1.0"
