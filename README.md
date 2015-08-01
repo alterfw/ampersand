@@ -14,8 +14,8 @@ Route::get('hello', function(){
   // your code here
 });
 
-Route::post('subscribe/newsletter', function($email){
-  // Do something with $email
+Route::post('subscribe/newsletter', function(){
+  // Do something with $_POST
 });
 
 Route::get('user/:id', function($user_id){
