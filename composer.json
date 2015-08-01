@@ -1,0 +1,29 @@
+{
+  "name": "alterfw/amperstand",
+  "description": "A microframework to develop using wordpress",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Sergio Vilar",
+      "email": "sergiovilar.r@gmail.com"
+    }
+  ],
+  "repositories": [
+    {
+      "url": "git@github.com:alterfw/WP-Router.git",
+      "type": "git"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+
+  },
+  "autoload": {
+    "psr-4": {
+      "Amperstand\\": "src/"
+    },
+    "files": [
+      "src/router.php"
+    ]
+  }
+}
