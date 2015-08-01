@@ -67,3 +67,10 @@ $books = $model->books->find();
 ```
 
 Read more about how to use Hero in [Alter's documentation](http://alter-framework.readthedocs.org/en/latest/models.html).
+
+
+## Roadmap
+
+* Add support to Request and Response objects
+* Improve viem handling
+* Add a json method to render
