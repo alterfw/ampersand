@@ -46,3 +46,24 @@ Route::get('hello/:name', function($name){
 ```
 
 You can also use layouts and template blocks, read more in [Twig documentation](http://twig.sensiolabs.org/documentation).
+
+## Models
+
+Ampersand does not include features related to models but it works well with [Hero](https://github.com/alterfw/hero).
+
+Just include hero into your theme composer.json
+
+    composer require alterfw/hero
+
+And should work fine:
+
+```php
+<?php
+
+$hero = new Hero();
+$model = $hero::get();
+
+$books = $model->books->find();
+```
+
+Read more about how to use Hero in [Alter's documentation](http://alter-framework.readthedocs.org/en/latest/models.html).
