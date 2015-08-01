@@ -69,6 +69,18 @@ $books = $model->books->find();
 
 Read more about how to use Hero in [Alter's documentation](http://alter-framework.readthedocs.org/en/latest/models.html).
 
+## Configuration
+
+You can override Amperstand default configuration creating a `config.php` in the root of your theme:
+
+```php
+<?php
+
+return [
+  'views' => 'views',
+  'cache' => false
+];
+```
 
 ## Roadmap
 
