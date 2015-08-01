@@ -15,6 +15,18 @@ class Route {
     self::instance()->registerGET($route, $callback);
   }
 
+  public static function post($route, $callback){
+    self::instance()->registerPOST($route, $callback);
+  }
+
+  public static function put($route, $callback){
+    self::instance()->registerPUT($route, $callback);
+  }
+
+  public static function delete($route, $callback){
+    self::instance()->registerDELETE($route, $callback);
+  }
+
 }
 
 class RouteImplementation {
@@ -133,10 +145,6 @@ class RouteImplementation {
     return $wp_rewrite->rules;
   }
 
-  public function registerGET($route, $callback) {
-    $this->addRoute('GET', $route, $callback);
-  }
-
   public function parse_request($wp_query) {
 
     if (isset($wp_query->query_vars['amp_route'])){
@@ -155,6 +163,22 @@ class RouteImplementation {
       }
 
     }
+  }
+
+  public function registerGET($route, $callback) {
+    $this->addRoute('GET', $route, $callback);
+  }
+
+  public function registerPOST($route, $callback) {
+    $this->addRoute('POST', $route, $callback);
+  }
+
+  public function registerPUT($route, $callback) {
+    $this->addRoute('PUT', $route, $callback);
+  }
+
+  public function registerDELETE($route, $callback) {
+    $this->addRoute('DELETE', $route, $callback);
   }
 
 }
