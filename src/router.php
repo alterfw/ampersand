@@ -62,7 +62,7 @@ class RouteImplementation {
       $robj['regex'] = '';
       $robj['qstring'] = 'index.php?amp_route='.$robj['id'];
       $robj['params'] = [];
-      $br = explode('/', $route);
+      $br = $broken;
       $pcounter = 0;
       $counter = 0;
       foreach($br as $part){
