@@ -27,7 +27,7 @@ Route::get('user/:id', function($req, $res){
 
 Ampersand uses [Twig](http://twig.sensiolabs.org/) to render templates.
 
-You render templates using routes:
+You can render templates using routes:
 
 ```php
 <?php
