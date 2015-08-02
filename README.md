@@ -10,15 +10,15 @@ You can register and handle custom routes with &:
 ```php
 <?php
 
-Route::get('hello', function(){
+Route::get('/hello', function(){
   // your code here
 });
 
-Route::post('subscribe/newsletter', function($req, $res){
+Route::post('/subscribe/newsletter', function($req, $res){
   $email = $req->params('email'); // Get $_POST['email'];
 });
 
-Route::get('user/:id', function($req, $res){
+Route::get('/user/:id', function($req, $res){
   $user_id = $req->params('id'); // Get $_GET['id'];
 });
 ```
@@ -31,7 +31,7 @@ You can render templates using routes:
 
 ```php
 <?php
-Route::get('hello/:name', function($req, $res){
+Route::get('/hello/:name', function($req, $res){
   $res->render('hello', ['name' => $req->params('name')]); // will render views/hello.html
 });
 ```
@@ -40,7 +40,7 @@ Or just render a json:
 
 ```php
 <?php
-Route::get('hello/:name', function($req, $res){
+Route::get('/hello/:name', function($req, $res){
   $res->toJSON($req->params()); // will render views/hello.html
 });
 ```
@@ -54,7 +54,7 @@ Don't want to use Ampersand templates? Not problem. You can also use Wordpress t
 ```php
 <?php
 
-Route::get('search', function($req, $res){
+Route::get('/search', function($req, $res){
   $res->template('search'); // Will render your-theme/search.php
 });
 ```
