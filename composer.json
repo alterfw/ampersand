@@ -15,8 +15,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Amperstand\\": "src/",
-      "Amperstand\\Http\\": "src/http"
+      "Ampersand\\": "src/",
+      "Ampersand\\Http\\": "src/http"
     },
     "files": [
       "main.php",
