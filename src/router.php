@@ -52,7 +52,7 @@ class RouteImplementation {
     $robj['id'] = str_replace('=', '', base64_encode($method.$route));
 
     // Generate the regex url
-    $broken = explode('/', $route);
+    $broken = array_values(array_filter(explode('/', $route)));
     if(count($broken) == 1) {
       $robj['regex'] = ''.$broken[0].'/?';
       $robj['qstring'] = 'index.php?amp_route='.$robj['id'];
@@ -142,7 +142,7 @@ class RouteImplementation {
 
     $wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
     return $wp_rewrite->rules;
-  }  
+  }
 
   public function parse_request($wp_query) {
 
