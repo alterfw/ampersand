@@ -1,5 +1,8 @@
 <?php
 
+use Ampersand\Http\Request;
+use Ampersand\Http\Response;
+
 class Route {
 
   private static $routeInstance;
@@ -93,18 +96,14 @@ class RouteImplementation {
 
   private function getCallback($route, $query_vars){
 
-    if(count($route['params'])  == 0){
-      $route["callback"]();
-    } else {
-      $ev = '$route["callback"](';
-      $par = [];
-      foreach($route['params'] as $param){
-        array_push($par, '$query_vars["'.$param.'"]');
-      }
-      $ev .= implode(',', $par);
-      $ev .= ");";
-      eval($ev);
-    }
+    unset($query_vars['amp_route']);
+    $req = new Request();
+    $req->setVars($query_vars);
+    $res = new Response();
+    $route["callback"]($req, $res);
+
+    Ampersand::getInstance()->setRequest($req);
+    Ampersand::getInstance()->setResponse($res);
 
   }
 
@@ -145,22 +144,25 @@ class RouteImplementation {
     return $wp_rewrite->rules;
   }
 
+  private function requireToVar($file){
+    ob_start();
+    require($file);
+    return ob_get_clean();
+  }
+
   public function parse_request($wp_query) {
 
     if (isset($wp_query->query_vars['amp_route'])){
       $route = $this->getRoute($wp_query->query_vars['amp_route']);
       if($route['id'] == $wp_query->query_vars['amp_route'] && $route['method'] == $_SERVER['REQUEST_METHOD']){
         $this->getCallback($route, $wp_query->query_vars);
-        exit(0);
       } else {
-        add_action( 'wp', 'force_404' );
-        function force_404() {
-          status_header( 404 );
-          nocache_headers();
-          include( get_query_template( '404' ) );
-          die();
-        }
+        Ampersand::getInstance()->response()->setStatus(404);
+        Ampersand::getInstance()->response()->write($this->requireToVar(get_query_template( '404' )));
       }
+
+      Ampersand::getInstance()->run();
+      exit(0);
 
     }
   }

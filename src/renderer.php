@@ -2,15 +2,19 @@
 
 class Render {
 
-  public static function template($template, $data = []) {
+  public static function template($template, $data = [], $show = true) {
     $rend = new Renderer();
-    echo $rend->twig()->render(str_replace('.', '/', $template).'.html', $data);
+    if($show) {
+        echo $rend->twig()->render(str_replace('.', '/', $template).'.html', $data);
+    } else {
+      return $rend->twig()->render(str_replace('.', '/', $template).'.html', $data);
+    }
+
   }
 
   public static function json($data) {
     header('Content-Type: application/json');
-    echo json_encode($data);
-    die();
+    return json_encode($data);
   }
 
 }
