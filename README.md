@@ -14,12 +14,12 @@ Route::get('hello', function(){
   // your code here
 });
 
-Route::post('subscribe/newsletter', function(){
-  // Do something with $_POST
+Route::post('subscribe/newsletter', function($req, $res){
+  $email = $req->params('email'); // Get $_POST['email'];
 });
 
-Route::get('user/:id', function($user_id){
-  // Do something with $user_id
+Route::get('user/:id', function($req, $res){
+  $user_id = $req->params('id'); // Get $_GET['id'];
 });
 ```
 
