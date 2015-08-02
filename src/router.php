@@ -35,12 +35,25 @@ class Route {
 class RouteImplementation {
 
   private $routes = [];
+  private $root = false;
+  private $base = '';
 
   public function __construct(){
+    $this->base = get_bloginfo('url');
     add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
     add_filter('query_vars', [$this, 'query_vars']);
     add_filter('init',  [$this, 'flush_rewrite_rules']);
     add_action("parse_request", [$this, 'parse_request']);
+  }
+
+  public function __destruct() {
+    $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    if($this->root && str_replace($this->base, '', $url) == '/'){
+      $route = $this->getRoute($this->root);
+      $this->getCallback($route, []);
+      Ampersand::getInstance()->run();
+      exit(0);
+    }
   }
 
   private function addRoute($method, $route, $callback) {
@@ -53,9 +66,16 @@ class RouteImplementation {
 
     // Generate the regex url
     $broken = array_values(array_filter(explode('/', $route)));
+
     if(count($broken) == 1) {
       $robj['regex'] = ''.$broken[0].'/?';
       $robj['qstring'] = 'index.php?amp_route='.$robj['id'];
+      $robj['params'] = [];
+
+    } elseif (count($broken) == 0) {
+      $this->root = $robj['id'];
+      $robj['regex'] = false;
+      $robj['qstring'] = false;
       $robj['params'] = [];
     } else {
 
@@ -123,7 +143,7 @@ class RouteImplementation {
     $rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
     $need = false;
     foreach($this->routes as $route) {
-      if (!isset( $rules[$route['regex']])) $need = true;
+      if ($route['regex'] && !isset( $rules[$route['regex']])) $need = true;
     }
 
     if($need){
@@ -137,7 +157,7 @@ class RouteImplementation {
     $new_rules = [];
 
     foreach($this->routes as $route) {
-      $new_rules[$route['regex']] = $route['qstring'];
+      if($route['regex']) $new_rules[$route['regex']] = $route['qstring'];
     }
 
     $wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
@@ -160,6 +180,7 @@ class RouteImplementation {
 
     }
   }
+
 
   public function registerGET($route, $callback) {
     $this->addRoute('GET', $route, $callback);
