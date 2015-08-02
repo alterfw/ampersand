@@ -10,11 +10,13 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "twig/twig": "~1.0"
+    "twig/twig": "~1.0",
+    "slim/slim": "~2.0"
   },
   "autoload": {
     "psr-4": {
-      "Amperstand\\": "src/"
+      "Amperstand\\": "src/",
+      "Amperstand\\Http\\": "src/http"
     },
     "files": [
       "main.php",
