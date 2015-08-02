@@ -33,7 +33,7 @@ You can render templates using routes:
 <?php
 Route::get('hello/:name', function($req, $res){
   $res->render('hello', ['name' => $req->params('name')]); // will render views/hello.html
-})
+});
 ```
 
 Or just render a json:
@@ -42,7 +42,7 @@ Or just render a json:
 <?php
 Route::get('hello/:name', function($req, $res){
   $res->toJSON($req->params()); // will render views/hello.html
-})
+});
 ```
 
 
