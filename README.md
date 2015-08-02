@@ -1,7 +1,7 @@
 & (ampersand)
 =============
 
-A microframework for Wordpress (in initial development)
+A microframework for Wordpress based on [Slim](http://www.slimframework.com/).
 
 ## Routes
 
@@ -31,8 +31,8 @@ You render templates using routes:
 
 ```php
 <?php
-Route::get('hello/:name', function($name){
-  Render::template('hello', ['name' => $name]); // will render views/hello.html
+Route::get('hello/:name', function($req, $res){
+  $res->render('hello', ['name' => $req->params('name')]); // will render views/hello.html
 })
 ```
 
@@ -40,8 +40,8 @@ Or just render a json:
 
 ```php
 <?php
-Route::get('hello/:name', function($name){
-  Render::json('hello', ['name' => $name]); // will render views/hello.html
+Route::get('hello/:name', function($req, $res){
+  $res->toJSON($req->params()); // will render views/hello.html
 })
 ```
 
@@ -81,9 +81,3 @@ return [
   'cache' => false
 ];
 ```
-
-## Roadmap
-
-* Add support to Request and Response objects
-* Improve viem handling
-* Add a json method to render
