@@ -142,13 +142,7 @@ class RouteImplementation {
 
     $wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
     return $wp_rewrite->rules;
-  }
-
-  private function requireToVar($file){
-    ob_start();
-    require($file);
-    return ob_get_clean();
-  }
+  }  
 
   public function parse_request($wp_query) {
 
@@ -158,7 +152,7 @@ class RouteImplementation {
         $this->getCallback($route, $wp_query->query_vars);
       } else {
         Ampersand::getInstance()->response()->setStatus(404);
-        Ampersand::getInstance()->response()->write($this->requireToVar(get_query_template( '404' )));
+        Ampersand::getInstance()->response()->template('404');
       }
 
       Ampersand::getInstance()->run();

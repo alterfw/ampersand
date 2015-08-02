@@ -45,8 +45,19 @@ Route::get('hello/:name', function($req, $res){
 });
 ```
 
-
 You can also use layouts and template blocks, read more in [Twig documentation](http://twig.sensiolabs.org/documentation).
+
+### Wordpress templates
+
+Don't want to use Ampersand templates? Not problem. You can also use Wordpress templates:
+
+```php
+<?php
+
+Route::get('search', function($req, $res){
+  $res->template('search'); // Will render your-theme/search.php
+});
+```
 
 ## Models
 
