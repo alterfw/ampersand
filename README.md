@@ -92,3 +92,7 @@ return [
   'cache' => false
 ];
 ```
+
+## Documentation
+
+You can read more about how Ampersand works in the [documentation page](http://alterfw.github.io/ampersand/docs/).
