@@ -28,7 +28,8 @@ class Renderer {
     $cache = Config::get('cache') ? __DIR__.'/../../../../'.Config::get('cache').'/' : false;
     $loader = new Twig_Loader_Filesystem(__DIR__.'/../../../../'.Config::get('views').'/');
     $this->twig = new Twig_Environment($loader, array(
-        'cache' => $cache
+        'cache' => $cache,
+        'debug' => Config::get('debug')
     ));
     return $this->twig;
   }
