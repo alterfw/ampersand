@@ -2,6 +2,7 @@
 
 use Ampersand\Http\Request;
 use Ampersand\Http\Response;
+use Ampersand\Config;
 
 class Ampersand {
 
