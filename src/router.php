@@ -5,6 +5,9 @@ use Ampersand\Http\Response;
 
 class Route {
 
+  private $routes = [];
+  private $root = false;
+  private $base = '';
   private static $routeInstance;
 
   private static function instance() {
@@ -30,13 +33,6 @@ class Route {
     self::instance()->registerDELETE($route, $callback);
   }
 
-}
-
-class RouteImplementation {
-
-  private $routes = [];
-  private $root = false;
-  private $base = '';
 
   public function __construct(){
     $this->base = get_bloginfo('url');
@@ -120,7 +116,11 @@ class RouteImplementation {
     $req = new Request();
     $req->setVars($query_vars);
     $res = new Response();
+
+    ob_start();
     $route["callback"]($req, $res);
+    $out = ob_get_clean();
+    $res->write($out);
 
     Ampersand::getInstance()->setRequest($req);
     Ampersand::getInstance()->setResponse($res);
