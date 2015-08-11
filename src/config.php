@@ -5,7 +5,7 @@ namespace Ampersand;
 class Config {
 
   public static function all(){
-    $default_conf = require '../config.php';
+    $default_conf = require __DIR__.'/../config.php';
     $user_config = __DIR__ . '/../../../../config.php';
     $conf_user = [];
     if(file_exists($user_config)) $conf_user = require $user_config;

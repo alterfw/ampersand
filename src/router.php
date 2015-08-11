@@ -10,9 +10,17 @@ class Route {
   private $base = '';
   private static $routeInstance;
 
+  private function __construct(){
+    $this->base = get_bloginfo('url');
+    add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
+    add_filter('query_vars', [$this, 'query_vars']);
+    add_filter('init',  [$this, 'flush_rewrite_rules']);
+    add_action("parse_request", [$this, 'parse_request']);
+  }
+
   private static function instance() {
     if(!self::$routeInstance){
-      self::$routeInstance = new RouteImplementation();
+      self::$routeInstance = new Route();
     }
     return self::$routeInstance;
   }
@@ -31,15 +39,6 @@ class Route {
 
   public static function delete($route, $callback){
     self::instance()->registerDELETE($route, $callback);
-  }
-
-
-  public function __construct(){
-    $this->base = get_bloginfo('url');
-    add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
-    add_filter('query_vars', [$this, 'query_vars']);
-    add_filter('init',  [$this, 'flush_rewrite_rules']);
-    add_action("parse_request", [$this, 'parse_request']);
   }
 
   public function __destruct() {
