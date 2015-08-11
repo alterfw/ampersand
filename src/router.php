@@ -53,13 +53,16 @@ class Route {
 
   public function __destruct() {
 
-    $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    if($this->root && str_replace($this->base, '', $url) == '/'){
-      $route = $this->getRoute($this->root);
-      $this->getCallback($route, []);
-      Ampersand::getInstance()->run();
-      $this->end();
+    if($this->getEnv() == 'WP') {
+      $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+      if($this->root && str_replace($this->base, '', $url) == '/'){
+        $route = $this->getRoute($this->root);
+        $this->getCallback($route, []);
+        Ampersand::getInstance()->run();
+        $this->end();
+      }
     }
+    
   }
 
   public function setRoutes($r) {
