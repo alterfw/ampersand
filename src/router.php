@@ -42,6 +42,7 @@ class Route {
   }
 
   public function __destruct() {
+
     $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     if($this->root && str_replace($this->base, '', $url) == '/'){
       $route = $this->getRoute($this->root);
@@ -108,6 +109,7 @@ class Route {
     }
 
     array_push($this->routes, $robj);
+    $this->flush_rewrite_rules();
 
   }
 
