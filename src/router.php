@@ -26,19 +26,19 @@ class Route {
   }
 
   public static function get($route, $callback){
-    self::instance()->registerGET($route, $callback);
+    self::instance()->addRoute('GET', func_get_args());
   }
 
   public static function post($route, $callback){
-    self::instance()->registerPOST($route, $callback);
+    self::instance()->addRoute('POST', func_get_args());
   }
 
   public static function put($route, $callback){
-    self::instance()->registerPUT($route, $callback);
+    self::instance()->addRoute('PUT', func_get_args());
   }
 
   public static function delete($route, $callback){
-    self::instance()->registerDELETE($route, $callback);
+    self::instance()->addRoute('DELETE', func_get_args());
   }
 
   public function __destruct() {
@@ -51,13 +51,22 @@ class Route {
     }
   }
 
-  private function addRoute($method, $route, $callback) {
+  private function addRoute($method, $parameters) {
 
     $robj = [];
-
+    $route = $parameters[0];
     $robj['method'] = $method;
-    $robj['callback'] = $callback;
     $robj['id'] = str_replace('=', '', base64_encode($method.$route));
+
+    $robj['callback'] = $parameters[count($parameters) -1];
+    $robj['middlewares'] = [];
+
+    // Get the middlewares
+    if(count($parameters) > 2) {
+      for($i = 1; $i <= count($parameters) - 2; $i++){
+        array_push($robj['middlewares'], $parameters[$i]);
+      }
+    }
 
     // Generate the regex url
     $broken = array_values(array_filter(explode('/', $route)));
@@ -116,10 +125,25 @@ class Route {
     $req->setVars($query_vars);
     $res = new Response();
 
+    if(count($route['middlewares']) > 0){
+      foreach($route['middlewares'] as $mid){
+
+        if(is_object($mid) && ($mid instanceof Closure)){
+          ob_start();
+          $mid($req, $res, $query_vars);
+          $res->write(ob_get_clean());
+        } else if(is_string($mid)) {
+          ob_start();
+          call_user_func_array($mid, array($req, $res, $query_vars));
+          $res->write(ob_get_clean());
+        }
+
+      }
+    }
+
     ob_start();
-    $route["callback"]($req, $res);
-    $out = ob_get_clean();
-    $res->write($out);
+    $route["callback"]($req, $res, $query_vars);
+    $res->write(ob_get_clean());
 
     Ampersand::getInstance()->setRequest($req);
     Ampersand::getInstance()->setResponse($res);
@@ -178,23 +202,6 @@ class Route {
       exit(0);
 
     }
-  }
-
-
-  public function registerGET($route, $callback) {
-    $this->addRoute('GET', $route, $callback);
-  }
-
-  public function registerPOST($route, $callback) {
-    $this->addRoute('POST', $route, $callback);
-  }
-
-  public function registerPUT($route, $callback) {
-    $this->addRoute('PUT', $route, $callback);
-  }
-
-  public function registerDELETE($route, $callback) {
-    $this->addRoute('DELETE', $route, $callback);
   }
 
 }
