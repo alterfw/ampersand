@@ -1,6 +1,8 @@
 & (ampersand)
 =============
 
+[![Build Status](https://travis-ci.org/alterfw/ampersand.svg)](https://travis-ci.org/alterfw/ampersand)
+
 A microframework for Wordpress based on [Slim](http://www.slimframework.com/).
 
 ## Routes
