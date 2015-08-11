@@ -11,11 +11,8 @@ class Route {
   private static $routeInstance;
 
   private function __construct(){
-    $this->base = get_bloginfo('url');
-    add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
-    add_filter('query_vars', [$this, 'query_vars']);
-    add_filter('init',  [$this, 'flush_rewrite_rules']);
-    add_action("parse_request", [$this, 'parse_request']);
+    $this->setBase();
+    $this->registerFilters();
   }
 
   private static function instance() {
@@ -23,6 +20,19 @@ class Route {
       self::$routeInstance = new Route();
     }
     return self::$routeInstance;
+  }
+
+  private function setBase() {
+    if($this->getEnv() == 'WP')
+      $this->base = get_bloginfo('url');
+  }
+
+  public static function getRoutes(){
+    return self::instance()->routes;
+  }
+
+  public static function reset() {
+    return self::instance()->setRoutes([]);
   }
 
   public static function get($route, $callback){
@@ -48,8 +58,12 @@ class Route {
       $route = $this->getRoute($this->root);
       $this->getCallback($route, []);
       Ampersand::getInstance()->run();
-      exit(0);
+      $this->end();
     }
+  }
+
+  public function setRoutes($r) {
+    $this->routes = $r;
   }
 
   private function addRoute($method, $parameters) {
@@ -109,7 +123,7 @@ class Route {
     }
 
     array_push($this->routes, $robj);
-    $this->flush_rewrite_rules();
+    $this->flush();
 
   }
 
@@ -163,6 +177,9 @@ class Route {
     return $query_vars;
   }
 
+  private function flush() {
+    if($this->getEnv() == 'WP') $this->flush_rewrite_rules();
+  }
 
   public function flush_rewrite_rules() {
     $rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
@@ -201,9 +218,30 @@ class Route {
       }
 
       Ampersand::getInstance()->run();
-      exit(0);
+      $this->end();
 
     }
+  }
+
+  private function registerFilters() {
+    if($this->getEnv() == 'WP') {
+      add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
+      add_filter('query_vars', [$this, 'query_vars']);
+      add_filter('init',  [$this, 'flush_rewrite_rules']);
+      add_action("parse_request", [$this, 'parse_request']);
+    }
+  }
+
+  private function getEnv() {
+    return defined('AMPERSAND_ENV') ? AMPERSAND_ENV : 'WP';
+  }
+
+  private function end(){
+
+    if($this->getEnv() == 'WP') {
+      die(0);
+    }
+
   }
 
 }
