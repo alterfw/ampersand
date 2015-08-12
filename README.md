@@ -16,12 +16,12 @@ Route::get('/hello', function(){
   // your code here
 });
 
-Route::post('/subscribe/newsletter', function($req, $res){
-  $email = $req->params('email'); // Get $_POST['email'];
+Route::post('/subscribe/newsletter', function(){
+  $email = $this->params('email'); // Get $_POST['email'];
 });
 
-Route::get('/user/:id', function($req, $res){
-  $user_id = $req->params('id'); // Get $_GET['id'];
+Route::get('/user/:id', function($id){
+  // do something with $id
 });
 ```
 
@@ -33,8 +33,8 @@ You can render templates using routes:
 
 ```php
 <?php
-Route::get('/hello/:name', function($req, $res){
-  $res->render('hello', ['name' => $req->params('name')]); // will render views/hello.html
+Route::get('/hello/:name', function($name){
+  $this->render('hello', ['name' => $name]); // will render views/hello.html
 });
 ```
 
@@ -42,8 +42,8 @@ Or just render a json:
 
 ```php
 <?php
-Route::get('/hello/:name', function($req, $res){
-  $res->toJSON($req->params()); // will render views/hello.html
+Route::get('/hello/:name', function($name){
+  $res->toJSON($this->params()); // will render views/hello.html
 });
 ```
 
@@ -56,7 +56,7 @@ Don't want to use Ampersand templates? Not problem. You can also use Wordpress t
 ```php
 <?php
 
-Route::get('/search', function($req, $res){
+Route::get('/search', function(){
   $res->template('search'); // Will render your-theme/search.php
 });
 ```
