@@ -59,7 +59,7 @@ class Route {
     $this->registerFilters();
   }
 
-  private function __destruct() {
+  public function __destruct() {
 
     if($this->getEnv() == 'WP') {
       $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
