@@ -201,7 +201,7 @@ class Route {
 
       $res->bindAndCall($cb);
 
-    } else if(is_string($mid)) {
+    } else if(is_string($cb)) {
       ob_start();
       call_user_func_array($cb, [$res->request, $res]);
       $res->write(ob_get_clean());

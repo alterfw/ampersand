@@ -22,7 +22,8 @@ class Callback extends Response {
 
   public function bindAndCall($cb){
     ob_start();
-    $cb->bindTo($this, $this)->__invoke($this->args);
+    $ncb = $cb->bindTo($this, $this);
+    call_user_func_array($ncb, $this->args);
     $this->write(ob_get_clean());
   }
 
