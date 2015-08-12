@@ -186,15 +186,20 @@ class Route {
     }
   }
 
-  private function getArguments($callback, $req, $res, $query_vars) {
+  private function runCallback($cb, $query_vars, $res){
 
-    $method = new ReflectionFunction($callback);
-    $numParam = $method->getNumberOfParameters();
-    $params = (object) $query_vars;
+    if(is_object($cb) && ($cb instanceof Closure)){
 
-    if($numParam == 1) return [$params];
-    if($numParam == 2) return [$req, $res];
-    if($numParam > 2) return [$req, $res, $params];
+      $cb->bindTo($res);
+      ob_start();
+      call_user_func_array($cb, $query_vars);
+      $res->write(ob_get_clean());
+
+    } else if(is_string($mid)) {
+      ob_start();
+      call_user_func_array($cb, [$res->request, $res]);
+      $res->write(ob_get_clean());
+    }
 
   }
 
@@ -203,27 +208,15 @@ class Route {
     unset($query_vars['amp_route']);
     $req = new Request();
     $req->setVars($query_vars);
-    $res = new Response();
+    $res = new Callback($req, $query_vars);
 
     if(count($route['middlewares']) > 0){
       foreach($route['middlewares'] as $mid){
-
-        if(is_object($mid) && ($mid instanceof Closure)){
-          ob_start();
-          $mid($req, $res, $query_vars);
-          $res->write(ob_get_clean());
-        } else if(is_string($mid)) {
-          ob_start();
-          call_user_func_array($mid, $this->getArguments($mid, $req, $res, $query_vars));
-          $res->write(ob_get_clean());
-        }
-
+        $this->runCallback($mid, $query_vars, $res);
       }
     }
 
-    ob_start();
-    call_user_func_array($route["callback"], $this->getArguments($route["callback"], $req, $res, $query_vars));
-    $res->write(ob_get_clean());
+    $this->runCallback($route["callback"], $query_vars, $res);
 
     Ampersand::getInstance()->setRequest($req);
     Ampersand::getInstance()->setResponse($res);
