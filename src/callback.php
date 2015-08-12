@@ -7,10 +7,12 @@ class Callback extends Response {
 
   public $request;
   public $parameters;
+  private $args;
 
-  public function __construct($req, $args) {
+  public function __construct($req, $args, $parameters) {
     $this->request = $req;
-    $this->parameters = $args;
+    $this->args = $args;
+    $this->parameters = $parameters;
     parent::__construct();
   }
 
@@ -20,7 +22,7 @@ class Callback extends Response {
 
   public function bindAndCall($cb){
     ob_start();
-    $cb->bindTo($this, $this)->__invoke($this->parameters);
+    $cb->bindTo($this, $this)->__invoke($this->args);
     $this->write(ob_get_clean());
   }
 

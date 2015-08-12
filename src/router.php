@@ -187,6 +187,14 @@ class Route {
     }
   }
 
+  private function getUrlParameters($params, $query_vars) {
+    $pars = [];
+    foreach($params as $param){
+      array_push($pars, $query_vars[$param]);
+    }
+    return $pars;
+  }
+
   private function runCallback($cb, $query_vars, $res){
 
     if(is_object($cb) && ($cb instanceof Closure)){
@@ -206,7 +214,7 @@ class Route {
     unset($query_vars['amp_route']);
     $req = new Request();
     $req->setVars($query_vars);
-    $res = new Callback($req, $query_vars);
+    $res = new Callback($req, $this->getUrlParameters($route['params'], $query_vars), $query_vars);
 
     if(count($route['middlewares']) > 0){
       foreach($route['middlewares'] as $mid){
