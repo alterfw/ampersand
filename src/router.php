@@ -186,6 +186,18 @@ class Route {
     }
   }
 
+  private function getArguments($callback, $req, $res, $query_vars) {
+
+    $method = new ReflectionFunction($callback);
+    $numParam = $method->getNumberOfParameters();
+    $params = (object) $query_vars;
+
+    if($numParam == 1) return [$params];
+    if($numParam == 2) return [$req, $res];
+    if($numParam > 2) return [$req, $res, $params];
+
+  }
+
   private function getCallback($route, $query_vars){
 
     unset($query_vars['amp_route']);
@@ -202,7 +214,7 @@ class Route {
           $res->write(ob_get_clean());
         } else if(is_string($mid)) {
           ob_start();
-          call_user_func_array($mid, array($req, $res, $query_vars));
+          call_user_func_array($mid, $this->getArguments($mid, $req, $res, $query_vars));
           $res->write(ob_get_clean());
         }
 
@@ -210,7 +222,7 @@ class Route {
     }
 
     ob_start();
-    $route["callback"]($req, $res, $query_vars);
+    call_user_func_array($route["callback"], $this->getArguments($route["callback"], $req, $res, $query_vars));
     $res->write(ob_get_clean());
 
     Ampersand::getInstance()->setRequest($req);
