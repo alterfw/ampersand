@@ -2,6 +2,7 @@
 
 use Ampersand\Http\Request;
 use Ampersand\Http\Response;
+use Ampersand\Callback;
 
 class Route {
 
@@ -190,10 +191,7 @@ class Route {
 
     if(is_object($cb) && ($cb instanceof Closure)){
 
-      $cb->bindTo($res);
-      ob_start();
-      call_user_func_array($cb, $query_vars);
-      $res->write(ob_get_clean());
+      $res->bindAndCall($cb);
 
     } else if(is_string($mid)) {
       ob_start();
