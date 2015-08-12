@@ -5,11 +5,11 @@ namespace Ampersand\Http;
 class Response extends \Slim\Http\Response {
 
   public function render($template, $data = []) {
-    $this->write(\Render::view($template, $data), true);
+    $this->write(\Render::view($template, $data));
   }
 
   public function template($template){
-    $this->write(\Render::template($template), true);
+    $this->write(\Render::template($template));
   }
 
   public function toJSON($data){

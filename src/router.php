@@ -9,14 +9,8 @@ class Route {
   private $root = false;
   private $base = '';
   private static $routeInstance;
-
-  private function __construct(){
-    $this->base = get_bloginfo('url');
-    add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
-    add_filter('query_vars', [$this, 'query_vars']);
-    add_filter('init',  [$this, 'flush_rewrite_rules']);
-    add_action("parse_request", [$this, 'parse_request']);
-  }
+  private $prefix = '';
+  private $middlewares = [];
 
   private static function instance() {
     if(!self::$routeInstance){
@@ -25,39 +19,121 @@ class Route {
     return self::$routeInstance;
   }
 
-  public static function get($route, $callback){
-    self::instance()->registerGET($route, $callback);
+
+  // --- Public API
+
+  public static function getRoutes(){
+    return self::instance()->routes;
   }
 
-  public static function post($route, $callback){
-    self::instance()->registerPOST($route, $callback);
+  public static function reset() {
+    if(self::instance()->getEnv() != 'TEST') throw new Exception("reset() shound't be called in production!");
+    return self::instance()->setRoutes([]);
   }
 
-  public static function put($route, $callback){
-    self::instance()->registerPUT($route, $callback);
+  public static function group() {
+    self::instance()->addGroup(func_get_args());
   }
 
-  public static function delete($route, $callback){
-    self::instance()->registerDELETE($route, $callback);
+  public static function get(){
+    self::instance()->addRoute('GET', func_get_args());
   }
 
-  public function __destruct() {
-    $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    if($this->root && str_replace($this->base, '', $url) == '/'){
-      $route = $this->getRoute($this->root);
-      $this->getCallback($route, []);
-      Ampersand::getInstance()->run();
-      exit(0);
+  public static function post(){
+    self::instance()->addRoute('POST', func_get_args());
+  }
+
+  public static function put(){
+    self::instance()->addRoute('PUT', func_get_args());
+  }
+
+  public static function delete(){
+    self::instance()->addRoute('DELETE', func_get_args());
+  }
+
+
+  // --- Private methods
+
+  private function __construct(){
+    $this->setBase();
+    $this->registerFilters();
+  }
+
+  private function __destruct() {
+
+    if($this->getEnv() == 'WP') {
+      $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+      if($this->root && str_replace($this->base, '', $url) == '/'){
+        $route = $this->getRoute($this->root);
+        $this->getCallback($route, []);
+        Ampersand::getInstance()->run();
+        $this->end();
+      }
     }
+
   }
 
-  private function addRoute($method, $route, $callback) {
+  public function setRoutes($r) {
+    $this->routes = $r;
+  }
+
+  private function setBase() {
+    if($this->getEnv() == 'WP')
+      $this->base = get_bloginfo('url');
+  }
+
+  private function getPrefix($route) {
+
+    $pref = $this->prefix;
+
+    if($pref == '')
+      return $route;
+
+    if(strpos($route, '/') !== 0)
+      $pref .= '/';
+
+    if(strpos($this->prefix, '/') !== 0)
+      $pref = '/'.$pref;
+
+    return $pref.$route;
+
+  }
+
+  private function addGroup($parameters) {
+
+    $callback = $parameters[count($parameters) -1];
+    $middlewares = [];
+
+    if(count($parameters) > 2) {
+      for($i = 1; $i <= count($parameters) - 2; $i++){
+        array_push($middlewares, $parameters[$i]);
+      }
+    }
+
+    $this->prefix = $parameters[0];
+    $this->middlewares = $middlewares;
+    call_user_func($callback);
+    $this->prefix = '';
+    $this->middlewares = [];
+
+  }
+
+  private function addRoute($method, $parameters) {
 
     $robj = [];
-
+    $route = $this->getPrefix($parameters[0]);
     $robj['method'] = $method;
-    $robj['callback'] = $callback;
     $robj['id'] = str_replace('=', '', base64_encode($method.$route));
+
+    $robj['callback'] = $parameters[count($parameters) -1];
+    $robj['middlewares'] = $this->middlewares;
+
+    // Get the middlewares
+    if(count($parameters) > 2) {
+      for($i = 1; $i <= count($parameters) - 2; $i++){
+        array_push($robj['middlewares'], $parameters[$i]);
+      }
+    }
 
     // Generate the regex url
     $broken = array_values(array_filter(explode('/', $route)));
@@ -99,6 +175,7 @@ class Route {
     }
 
     array_push($this->routes, $robj);
+    $this->flush();
 
   }
 
@@ -116,16 +193,55 @@ class Route {
     $req->setVars($query_vars);
     $res = new Response();
 
+    if(count($route['middlewares']) > 0){
+      foreach($route['middlewares'] as $mid){
+
+        if(is_object($mid) && ($mid instanceof Closure)){
+          ob_start();
+          $mid($req, $res, $query_vars);
+          $res->write(ob_get_clean());
+        } else if(is_string($mid)) {
+          ob_start();
+          call_user_func_array($mid, array($req, $res, $query_vars));
+          $res->write(ob_get_clean());
+        }
+
+      }
+    }
+
     ob_start();
-    $route["callback"]($req, $res);
-    $out = ob_get_clean();
-    $res->write($out);
+    $route["callback"]($req, $res, $query_vars);
+    $res->write(ob_get_clean());
 
     Ampersand::getInstance()->setRequest($req);
     Ampersand::getInstance()->setResponse($res);
 
   }
 
+  private function flush() {
+    if($this->getEnv() == 'WP') $this->flush_rewrite_rules();
+  }
+
+  private function registerFilters() {
+    if($this->getEnv() == 'WP') {
+      add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
+      add_filter('query_vars', [$this, 'query_vars']);
+      add_filter('init',  [$this, 'flush_rewrite_rules']);
+      add_action("parse_request", [$this, 'parse_request']);
+    }
+  }
+
+  private function getEnv() {
+    return defined('AMPERSAND_ENV') ? AMPERSAND_ENV : 'WP';
+  }
+
+  private function end(){
+    if($this->getEnv() == 'WP')
+      die(0);
+  }
+
+
+  // --- WordPress API
 
   public function query_vars( $query_vars ) {
     array_push($query_vars, 'amp_route');
@@ -136,7 +252,6 @@ class Route {
     }
     return $query_vars;
   }
-
 
   public function flush_rewrite_rules() {
     $rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
@@ -175,26 +290,9 @@ class Route {
       }
 
       Ampersand::getInstance()->run();
-      exit(0);
+      $this->end();
 
     }
-  }
-
-
-  public function registerGET($route, $callback) {
-    $this->addRoute('GET', $route, $callback);
-  }
-
-  public function registerPOST($route, $callback) {
-    $this->addRoute('POST', $route, $callback);
-  }
-
-  public function registerPUT($route, $callback) {
-    $this->addRoute('PUT', $route, $callback);
-  }
-
-  public function registerDELETE($route, $callback) {
-    $this->addRoute('DELETE', $route, $callback);
   }
 
 }

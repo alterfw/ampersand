@@ -1,0 +1,7 @@
+<phpunit bootstrap="test/bootstrap.php" backupGlobals="false" colors="true">
+    <testsuites>
+        <testsuite>
+            <directory suffix="_spec.php">test/spec</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
