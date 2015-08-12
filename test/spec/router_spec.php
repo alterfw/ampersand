@@ -154,4 +154,131 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
 
   }
 
+  function test_route_with_closure_middleware() {
+
+    Route::get('/bike', $this->getCallback(), $this->getCallback());
+    $target = Route::getRoutes()[0];
+
+    $this->assertCount(1, $target['middlewares']);
+    $this->assertEquals(get_class($target['middlewares'][0]), 'Closure');
+    $this->assertEquals($target['middlewares'][0], $this->getCallback());
+
+  }
+
+  // --- Group of routes
+
+  function test_group_of_routes() {
+
+    Route::group('admin', function(){
+      Route::get('/dashboard', $this->getCallback());
+    });
+
+    $target = Route::getRoutes()[0];
+    $id = str_replace('=', '', base64_encode('GET/admin/dashboard'));
+
+    $this->assertEquals($target['regex'], 'admin/dashboard/?');
+    $this->assertEquals($target['method'], 'GET');
+    $this->assertEquals($target['id'], $id);
+    $this->assertCount(0, $target['middlewares']);
+    $this->assertCount(0, $target['params']);
+
+  }
+
+  function test_group_of_routes_with_second_level_routes() {
+
+    Route::group('admin', function(){
+      Route::get('/panel/dashboard', $this->getCallback());
+    });
+
+    $target = Route::getRoutes()[0];
+    $id = str_replace('=', '', base64_encode('GET/admin/panel/dashboard'));
+
+    $this->assertEquals($target['regex'], 'admin/panel/dashboard/?');
+    $this->assertEquals($target['method'], 'GET');
+    $this->assertEquals($target['id'], $id);
+    $this->assertCount(0, $target['middlewares']);
+    $this->assertCount(0, $target['params']);
+
+  }
+
+  function test_group_of_routes_with_second_level() {
+
+    Route::group('admin/panel', function(){
+      Route::get('/dashboard', $this->getCallback());
+    });
+
+    $target = Route::getRoutes()[0];
+    $id = str_replace('=', '', base64_encode('GET/admin/panel/dashboard'));
+
+    $this->assertEquals($target['regex'], 'admin/panel/dashboard/?');
+    $this->assertEquals($target['method'], 'GET');
+    $this->assertEquals($target['id'], $id);
+    $this->assertCount(0, $target['middlewares']);
+    $this->assertCount(0, $target['params']);
+
+  }
+
+  function test_group_of_routes_with_parameters() {
+
+    Route::group('admin', function(){
+      Route::get('/dashboard/:section', $this->getCallback());
+    });
+
+    $target = Route::getRoutes()[0];
+    $id = str_replace('=', '', base64_encode('GET/admin/dashboard/:section'));
+
+    $this->assertEquals($target['regex'], 'admin/dashboard/([a-zA-Z0-9]+)/?');
+    $this->assertEquals($target['method'], 'GET');
+    $this->assertEquals($target['id'], $id);
+    $this->assertCount(0, $target['middlewares']);
+    $this->assertCount(1, $target['params']);
+    $this->assertEquals($target['params'][0], 'section');
+
+  }
+
+  function test_group_of_routes_with_parameters_in_the_group() {
+
+    Route::group('admin/:section', function(){
+      Route::get('/dashboard', $this->getCallback());
+    });
+
+    $target = Route::getRoutes()[0];
+    $id = str_replace('=', '', base64_encode('GET/admin/:section/dashboard'));
+
+    $this->assertEquals($target['regex'], 'admin/([a-zA-Z0-9]+)/dashboard/?');
+    $this->assertEquals($target['method'], 'GET');
+    $this->assertEquals($target['id'], $id);
+    $this->assertCount(0, $target['middlewares']);
+    $this->assertCount(1, $target['params']);
+    $this->assertEquals($target['params'][0], 'section');
+
+  }
+
+  function test_group_of_routes_with_one_middleware() {
+
+    Route::group('admin', 'mid1', function(){
+      Route::get('/dashboard', $this->getCallback());
+    });
+
+    $target = Route::getRoutes()[0];
+
+    $this->assertCount(1, $target['middlewares']);
+    $this->assertEquals($target['middlewares'][0], 'mid1');
+
+  }
+
+  function test_group_of_routes_with_two_middlewares() {
+
+    Route::group('admin', 'mid1', 'mid2', function(){
+      Route::get('/dashboard', $this->getCallback());
+    });
+
+    $target = Route::getRoutes()[0];
+
+    $this->assertCount(2, $target['middlewares']);
+    $this->assertEquals($target['middlewares'][0], 'mid1');
+    $this->assertEquals($target['middlewares'][1], 'mid2');
+
+  }
+
 }

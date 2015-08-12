@@ -9,11 +9,8 @@ class Route {
   private $root = false;
   private $base = '';
   private static $routeInstance;
-
-  private function __construct(){
-    $this->setBase();
-    $this->registerFilters();
-  }
+  private $prefix = '';
+  private $middlewares = [];
 
   private static function instance() {
     if(!self::$routeInstance){
@@ -22,36 +19,47 @@ class Route {
     return self::$routeInstance;
   }
 
-  private function setBase() {
-    if($this->getEnv() == 'WP')
-      $this->base = get_bloginfo('url');
-  }
+
+  // --- Public API
 
   public static function getRoutes(){
     return self::instance()->routes;
   }
 
   public static function reset() {
+    if(self::instance()->getEnv() != 'TEST') throw new Exception("reset() shound't be called in production!");
     return self::instance()->setRoutes([]);
   }
 
-  public static function get($route, $callback){
+  public static function group() {
+    self::instance()->addGroup(func_get_args());
+  }
+
+  public static function get(){
     self::instance()->addRoute('GET', func_get_args());
   }
 
-  public static function post($route, $callback){
+  public static function post(){
     self::instance()->addRoute('POST', func_get_args());
   }
 
-  public static function put($route, $callback){
+  public static function put(){
     self::instance()->addRoute('PUT', func_get_args());
   }
 
-  public static function delete($route, $callback){
+  public static function delete(){
     self::instance()->addRoute('DELETE', func_get_args());
   }
 
-  public function __destruct() {
+
+  // --- Private methods
+
+  private function __construct(){
+    $this->setBase();
+    $this->registerFilters();
+  }
+
+  private function __destruct() {
 
     if($this->getEnv() == 'WP') {
       $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -62,22 +70,63 @@ class Route {
         $this->end();
       }
     }
-    
+
   }
 
   public function setRoutes($r) {
     $this->routes = $r;
   }
 
+  private function setBase() {
+    if($this->getEnv() == 'WP')
+      $this->base = get_bloginfo('url');
+  }
+
+  private function getPrefix($route) {
+
+    $pref = $this->prefix;
+
+    if($pref == '')
+      return $route;
+
+    if(strpos($route, '/') !== 0)
+      $pref .= '/';
+
+    if(strpos($this->prefix, '/') !== 0)
+      $pref = '/'.$pref;
+
+    return $pref.$route;
+
+  }
+
+  private function addGroup($parameters) {
+
+    $callback = $parameters[count($parameters) -1];
+    $middlewares = [];
+
+    if(count($parameters) > 2) {
+      for($i = 1; $i <= count($parameters) - 2; $i++){
+        array_push($middlewares, $parameters[$i]);
+      }
+    }
+
+    $this->prefix = $parameters[0];
+    $this->middlewares = $middlewares;
+    call_user_func($callback);
+    $this->prefix = '';
+    $this->middlewares = [];
+
+  }
+
   private function addRoute($method, $parameters) {
 
     $robj = [];
-    $route = $parameters[0];
+    $route = $this->getPrefix($parameters[0]);
     $robj['method'] = $method;
     $robj['id'] = str_replace('=', '', base64_encode($method.$route));
 
     $robj['callback'] = $parameters[count($parameters) -1];
-    $robj['middlewares'] = [];
+    $robj['middlewares'] = $this->middlewares;
 
     // Get the middlewares
     if(count($parameters) > 2) {
@@ -169,6 +218,30 @@ class Route {
 
   }
 
+  private function flush() {
+    if($this->getEnv() == 'WP') $this->flush_rewrite_rules();
+  }
+
+  private function registerFilters() {
+    if($this->getEnv() == 'WP') {
+      add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
+      add_filter('query_vars', [$this, 'query_vars']);
+      add_filter('init',  [$this, 'flush_rewrite_rules']);
+      add_action("parse_request", [$this, 'parse_request']);
+    }
+  }
+
+  private function getEnv() {
+    return defined('AMPERSAND_ENV') ? AMPERSAND_ENV : 'WP';
+  }
+
+  private function end(){
+    if($this->getEnv() == 'WP')
+      die(0);
+  }
+
+
+  // --- WordPress API
 
   public function query_vars( $query_vars ) {
     array_push($query_vars, 'amp_route');
@@ -178,10 +251,6 @@ class Route {
       }
     }
     return $query_vars;
-  }
-
-  private function flush() {
-    if($this->getEnv() == 'WP') $this->flush_rewrite_rules();
   }
 
   public function flush_rewrite_rules() {
@@ -224,27 +293,6 @@ class Route {
       $this->end();
 
     }
-  }
-
-  private function registerFilters() {
-    if($this->getEnv() == 'WP') {
-      add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
-      add_filter('query_vars', [$this, 'query_vars']);
-      add_filter('init',  [$this, 'flush_rewrite_rules']);
-      add_action("parse_request", [$this, 'parse_request']);
-    }
-  }
-
-  private function getEnv() {
-    return defined('AMPERSAND_ENV') ? AMPERSAND_ENV : 'WP';
-  }
-
-  private function end(){
-
-    if($this->getEnv() == 'WP') {
-      die(0);
-    }
-
   }
 
 }
