@@ -63,7 +63,7 @@ Route::get('/search', function(){
 
 ## Models
 
-Ampersand does not include features related to models but it works well with [Hero](https://github.com/alterfw/hero).
+Ampersand does not include features related to models but it works well with [Hero](http://alterfw.github.io/hero/).
 
 Just include hero into your theme composer.json
 
