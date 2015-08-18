@@ -60,20 +60,6 @@ class Route {
     $this->registerFilters();
   }
 
-  public function __destruct() {
-
-    if($this->getEnv() == 'WP') {
-      $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-      if($this->root && str_replace($this->base, '', $url) == '/'){
-        $route = $this->getRoute($this->root);
-        $this->getCallback($route, []);
-        Ampersand::getInstance()->run();
-        $this->end();
-      }
-    }
-
-  }
-
   public function setRoutes($r) {
     $this->routes = $r;
   }
@@ -292,6 +278,7 @@ class Route {
   public function parse_request($wp_query) {
 
     if (isset($wp_query->query_vars['amp_route'])){
+
       $route = $this->getRoute($wp_query->query_vars['amp_route']);
       if($route['id'] == $wp_query->query_vars['amp_route'] && $route['method'] == $_SERVER['REQUEST_METHOD']){
         $this->getCallback($route, $wp_query->query_vars);
@@ -303,7 +290,19 @@ class Route {
       Ampersand::getInstance()->run();
       $this->end();
 
+    } else {
+
+      if($this->getEnv() == 'WP') {
+        $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        if($this->root && str_replace($this->base, '', $url) == '/'){
+          $route = $this->getRoute($this->root);
+          $this->getCallback($route, []);
+          Ampersand::getInstance()->run();
+        }
+      }      
+
     }
+
   }
 
 }
