@@ -6,7 +6,7 @@ class Render {
 
   private static $twig;
 
-  private static function getTwig() {
+  public static function getTwig() {
     if(!self::$twig){
       Twig_Autoloader::register();
       $cache = Config::get('cache') ? __DIR__.'/../../../../'.Config::get('cache').'/' : false;
@@ -25,7 +25,7 @@ class Render {
 
   public static function template($template) {
     ob_start();
-    require(get_query_template($template));
+    require(get_template_part($template));
     return ob_get_clean();
   }
 
