@@ -25,7 +25,7 @@ class Render {
 
   public static function template($template) {
     ob_start();
-    require(get_template_part($template));
+    get_template_part($template);
     return ob_get_clean();
   }
 
