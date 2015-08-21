@@ -110,6 +110,7 @@ class Route {
     $robj = [];
     $route = $this->getPrefix($parameters[0]);
     $robj['method'] = $method;
+    $robj['route'] = $route;
     $robj['id'] = str_replace('=', '', base64_encode($method.$route));
 
     $robj['callback'] = $parameters[count($parameters) -1];
@@ -170,6 +171,13 @@ class Route {
     foreach($this->routes as $route){
       if($route['id'] == $route_id)
       return $route;
+    }
+  }
+
+  private function getRouteWithMethod($_route, $method) {
+    foreach($this->routes as $route) {
+      if($route['method'] == $method && $route['route'] == $_route['route'])
+        return $route;
     }
   }
 
@@ -276,12 +284,15 @@ class Route {
   }
 
   public function parse_request($wp_query) {
-
     if (isset($wp_query->query_vars['amp_route'])){
 
       $route = $this->getRoute($wp_query->query_vars['amp_route']);
+      $_route = $this->getRouteWithMethod($route, $_SERVER['REQUEST_METHOD']);
+      
       if($route['id'] == $wp_query->query_vars['amp_route'] && $route['method'] == $_SERVER['REQUEST_METHOD']){
         $this->getCallback($route, $wp_query->query_vars);
+      } else if($_route['method'] == $_SERVER['REQUEST_METHOD']) {
+        $this->getCallback($_route, $wp_query->query_vars);
       } else {
         Ampersand::getInstance()->response()->setStatus(404);
         Ampersand::getInstance()->response()->template('404');
