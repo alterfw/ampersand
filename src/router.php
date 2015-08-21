@@ -197,8 +197,6 @@ class Route {
 
   private function getCallback($route, $query_vars){
 
-    var_dump($query_vars);
-
     unset($query_vars['amp_route']);
     $req = new Request();
     $req->setVars($query_vars);
