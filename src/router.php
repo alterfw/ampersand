@@ -149,7 +149,7 @@ class Route {
         if(preg_match('/^:[a-zA-Z0-9]+/', $part)){
           $pcounter++;
           $rpart = str_replace(':', '', $part);
-          $robj['regex'] .= '([a-zA-Z0-9]+)';
+          $robj['regex'] .= '([a-zA-Z0-9-]+)';
           array_push($robj['params'], $rpart);
           $robj['qstring'] .= '&'.$rpart.'=$matches['.$pcounter.']';
         } else {
@@ -196,6 +196,8 @@ class Route {
   }
 
   private function getCallback($route, $query_vars){
+
+    var_dump($query_vars);
 
     unset($query_vars['amp_route']);
     $req = new Request();
@@ -299,7 +301,7 @@ class Route {
           $this->getCallback($route, []);
           Ampersand::getInstance()->run();
         }
-      }      
+      }
 
     }
 
