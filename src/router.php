@@ -52,6 +52,15 @@ class Route {
     self::instance()->addRoute('DELETE', func_get_args());
   }
 
+  public static function map() {
+    $parameters = func_get_args();
+    $methods = $parameters[0];
+    if(!is_array($methods)) throw new \Exception("The first argument for map() method must be an array");
+    unset($parameters[0]);
+    $args = array_values($parameters);
+    self::instance()->addRoute($methods, $args);
+  }
+
 
   // --- Private methods
 
@@ -107,11 +116,13 @@ class Route {
 
   private function addRoute($method, $parameters) {
 
+    $methods = (is_array($method)) ? $method : [$method];
+    $_method = implode('', $methods);
     $robj = [];
     $route = $this->getPrefix($parameters[0]);
-    $robj['method'] = $method;
+    $robj['methods'] = $methods;
     $robj['route'] = $route;
-    $robj['id'] = str_replace('=', '', base64_encode($method.$route));
+    $robj['id'] = str_replace('=', '', base64_encode($_method.$route));
 
     $robj['callback'] = $parameters[count($parameters) -1];
     $robj['middlewares'] = $this->middlewares;
@@ -176,7 +187,7 @@ class Route {
 
   private function getRouteWithMethod($_route, $method) {
     foreach($this->routes as $route) {
-      if($route['method'] == $method && $route['route'] == $_route['route'])
+      if(in_array($method, $route['methods']) && $route['route'] == $_route['route'])
         return $route;
     }
   }
@@ -291,9 +302,9 @@ class Route {
       $route = $this->getRoute($wp_query->query_vars['amp_route']);
       $_route = $this->getRouteWithMethod($route, $_SERVER['REQUEST_METHOD']);
       
-      if($route['id'] == $wp_query->query_vars['amp_route'] && $route['method'] == $_SERVER['REQUEST_METHOD']){
+      if($route['id'] == $wp_query->query_vars['amp_route'] && in_array($_SERVER['REQUEST_METHOD'], $route['methods'])){
         $this->getCallback($route, $wp_query->query_vars);
-      } else if($_route['method'] == $_SERVER['REQUEST_METHOD']) {
+      } else if(in_array($_SERVER['REQUEST_METHOD'], $route['methods'])) {
         $this->getCallback($_route, $wp_query->query_vars);
       } else {
         Ampersand::getInstance()->response()->setStatus(404);
