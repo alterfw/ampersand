@@ -32,7 +32,8 @@ class Session {
   }
 
   private function _has($key) {
-    return !empty($this->_get($key));
+    $val = $this->_get($key);
+    return !empty($val);
   }
 
   public static function flash($value, $key = 'message') {
