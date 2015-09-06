@@ -24,4 +24,4 @@ matrix:
 
 before_script: composer install
 
-script: phpunit --configuration phpunit.dist.xml
+script: composer test
