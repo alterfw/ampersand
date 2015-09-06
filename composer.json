@@ -20,13 +20,15 @@
   "autoload": {
     "psr-4": {
       "Ampersand\\": "src/",
-      "Ampersand\\Http\\": "src/http"
+      "Ampersand\\Http\\": "src/http",
+      "Ampersand\\Util\\": "src/util"
     },
     "files": [
       "main.php",
       "src/router.php",
       "src/session.php",
-      "src/renderer.php"
+      "src/renderer.php",
+      "src/helpers/URL.php"
     ]
   },
   "scripts": {
