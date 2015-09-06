@@ -11,10 +11,13 @@ class Render {
       Twig_Autoloader::register();
       $cache = Config::get('cache') ? __DIR__.'/../../../../'.Config::get('cache').'/' : false;
       $loader = new Twig_Loader_Filesystem(__DIR__.'/../../../../'.Config::get('views').'/');
-      self::$twig = new Twig_Environment($loader, array(
+      $twig = new Twig_Environment($loader, array(
           'cache' => $cache,
           'debug' => Config::get('debug')
       ));
+      // Add globals
+      $twig->addGlobal('session', \Session::getInstance());
+      self::$twig = $twig;
     }
     return self::$twig;
   }
