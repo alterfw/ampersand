@@ -17,6 +17,7 @@ class Render {
       ));
       // Add globals
       $twig->addGlobal('session', \Session::getInstance());
+      $twig->addGlobal('url', new \URL());
       self::$twig = $twig;
     }
     return self::$twig;
