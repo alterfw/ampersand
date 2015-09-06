@@ -28,7 +28,7 @@
       "src/router.php",
       "src/session.php",
       "src/renderer.php",
-      "src/helpers/url.php"
+      "src/helpers/URL.php"
     ]
   },
   "scripts": {
