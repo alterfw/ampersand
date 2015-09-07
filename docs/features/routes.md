@@ -32,6 +32,16 @@ Route::get('/car/:model', function($model){
 });
 ```
 
+## Multiple HTTP methods in a single route
+
+You can use the `map` method to create a route that can be triggered by more than one HTTP method:
+
+```php
+Route::map(['GET', 'POST'], '/contact', function(){
+  // Do something here
+}
+```
+
 # Middlewares
 
 Middlewares allow you to run pieces of code before the route callback be triggered.

@@ -38,6 +38,10 @@ menu_sub:
         - [/docs/features/views.html, Views and Layouts]
         - [/docs/features/wordpress.html, WordPress Templates]
         - [/docs/features/models.html, Models]
+    - title: Helpers
+      items:
+        - [/docs/helpers/session.html, Session]
+        - [/docs/helpers/url.html, URL]
     - title: Request
       items:
         - [/docs/request/overview.html, Overview]
