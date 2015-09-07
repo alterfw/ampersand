@@ -11,6 +11,7 @@ github:
     repo: docs-template
 
 title: Ampersand
+url: http://alterfw.github.io/ampersand/
 name: Ampersand
 composer: alterfw/ampersand
 subTitle: Ampersand, a micro framework for WordPress.
