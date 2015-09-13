@@ -32,6 +32,7 @@
     ]
   },
   "scripts": {
-    "test": "AMPERSAND_ENV=TEST phpunit --stderr"
+    "test": "AMPERSAND_ENV=TEST phpunit --stderr",
+    "open": "DIP='http://'$(docker-machine ip default); DIP+=':8080'; open $DIP"
   }
 }

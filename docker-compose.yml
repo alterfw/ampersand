@@ -1,0 +1,19 @@
+ampersand_wp:
+  image: wordpress
+  links:
+    - ampersand_db:mysql
+  ports:
+    - 8080:80
+  working_dir: /var/www/html
+  volumes:
+   - .:/var/www/html/wp-content/themes/development/
+   - ./test/theme/functions.php:/var/www/html/wp-content/themes/development/functions.php
+   - ./test/theme/_main.php:/var/www/html/wp-content/themes/development/_main.php
+   - ./test/theme/index.php:/var/www/html/wp-content/themes/development/index.php
+   - ./test/theme/style.css:/var/www/html/wp-content/themes/development/style.css
+
+
+ampersand_db:
+  image: mariadb
+  environment:
+    MYSQL_ROOT_PASSWORD: example
