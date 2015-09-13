@@ -275,7 +275,14 @@ class Route {
     $rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
     $need = false;
     foreach($this->routes as $route) {
-      if ($route['regex'] && !isset( $rules[$route['regex']])) $need = true;
+      if ($route['regex'] &&
+        (
+          !isset( $rules[$route['regex']])
+          || $rules[$route['regex']] !== 'index.php?amp_route='.$route['id']
+        )
+      ) {
+        $need = true;
+      }
     }
 
     if($need){
