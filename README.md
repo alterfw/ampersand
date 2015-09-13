@@ -13,8 +13,6 @@ A microframework for Wordpress based on [Slim](http://www.slimframework.com/).
 
     composer require alterfw/ampersand
 
-## Getting started
-
 Require the composer autoload file into your `functions.php`:
 
 ```php
@@ -33,7 +31,7 @@ Before create any pull requests make sure that all tests are passing.
 
 ### Development Environment
 
-To setup de developmente environment first download [Docker](https://www.docker.com/) and create a virtual machine:
+To setup de development environment first download [Docker](https://www.docker.com/) and create a virtual machine:
 
     docker-machine create --driver virtualbox default
     eval "$(docker-machine env default)"
