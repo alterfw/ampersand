@@ -12,7 +12,7 @@
   "require": {
     "twig/twig": "~1.0",
     "slim/slim": "~2.0",
-    "aura/session": "3.x-dev"
+    "aura/session": "~2.0"
   },
   "require-dev": {
     "phpunit/phpunit": "3.x"
