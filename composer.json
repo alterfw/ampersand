@@ -12,7 +12,8 @@
   "require": {
     "twig/twig": "~1.0",
     "slim/slim": "~2.0",
-    "aura/session": "~2.0"
+    "aura/session": "~2.0",
+    "nikic/fast-route": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "3.x"

@@ -117,60 +117,25 @@ class Route {
   private function addRoute($method, $parameters) {
 
     $methods = (is_array($method)) ? $method : [$method];
-    $_method = implode('', $methods);
+    $_route = $this->getPrefix($parameters[0]);
+    $broken = array_values(array_filter(explode('/', $_route)));
     $robj = [];
-    $route = $this->getPrefix($parameters[0]);
     $robj['methods'] = $methods;
-    $robj['route'] = $route;
-    $robj['id'] = str_replace('=', '', base64_encode($_method.$route));
-
     $robj['callback'] = $parameters[count($parameters) -1];
+
+    foreach($broken as $part){
+      if(preg_match('/^:[a-zA-Z0-9]+/', $part))
+        $_route = str_replace($part, "{".substr($part, 1)."}", $_route);
+    }
+
+    $robj['route'] = $_route;
+    $robj['id'] = str_replace('=', '', base64_encode(implode('', $methods). $robj['route']));
     $robj['middlewares'] = $this->middlewares;
 
-    // Get the middlewares
     if(count($parameters) > 2) {
       for($i = 1; $i <= count($parameters) - 2; $i++){
         array_push($robj['middlewares'], $parameters[$i]);
       }
-    }
-
-    // Generate the regex url
-    $broken = array_values(array_filter(explode('/', $route)));
-
-    if(count($broken) == 1) {
-      $robj['regex'] = ''.$broken[0].'/?';
-      $robj['qstring'] = 'index.php?amp_route='.$robj['id'];
-      $robj['params'] = [];
-
-    } elseif (count($broken) == 0) {
-      $this->root = $robj['id'];
-      $robj['regex'] = false;
-      $robj['qstring'] = false;
-      $robj['params'] = [];
-    } else {
-
-      $robj['regex'] = '';
-      $robj['qstring'] = 'index.php?amp_route='.$robj['id'];
-      $robj['params'] = [];
-      $br = $broken;
-      $pcounter = 0;
-      $counter = 0;
-      foreach($br as $part){
-        $counter++;
-        if($counter > 1) $robj['regex'] .= '/';
-        if(preg_match('/^:[a-zA-Z0-9]+/', $part)){
-          $pcounter++;
-          $rpart = str_replace(':', '', $part);
-          $robj['regex'] .= '([a-zA-Z0-9-]+)';
-          array_push($robj['params'], $rpart);
-          $robj['qstring'] .= '&'.$rpart.'=$matches['.$pcounter.']';
-        } else {
-          $robj['regex'] .= $part;
-        }
-
-      }
-      $robj['regex'] .= '/?';
-
     }
 
     array_push($this->routes, $robj);
@@ -214,20 +179,19 @@ class Route {
 
   }
 
-  private function getCallback($route, $query_vars){
+  private function getCallback($id, $handler, $query_vars){
 
-    unset($query_vars['amp_route']);
     $req = new Request();
     $req->setVars($query_vars);
-    $res = new Callback($req, $this->getUrlParameters($route['params'], $query_vars), $query_vars);
-
+    $res = new Callback($req, $query_vars);
+    $route = $this->getRoute($id);
     if(count($route['middlewares']) > 0){
       foreach($route['middlewares'] as $mid){
         $this->runCallback($mid, $query_vars, $res);
       }
     }
 
-    $this->runCallback($route["callback"], $query_vars, $res);
+    $this->runCallback($handler, $query_vars, $res);
 
     Ampersand::getInstance()->setRequest($req);
     Ampersand::getInstance()->setResponse($res);
@@ -240,11 +204,37 @@ class Route {
 
   private function registerFilters() {
     if($this->getEnv() == 'WP') {
+
       add_filter('generate_rewrite_rules', [$this, 'rewrite_url']);
-      add_filter('query_vars', [$this, 'query_vars']);
       add_filter('init',  [$this, 'flush_rewrite_rules']);
       add_action("parse_request", [$this, 'parse_request']);
+
     }
+  }
+
+  public function flush_rewrite_rules() {
+    $rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
+    $need = false;
+    $counter = 0;
+    foreach($rules as $key=>$value) {
+      if($value === "index.php?ampersand_load=true") $counter++;
+    }
+    if($counter != count($this->routes)) $need = true;
+    if($need) {
+      global $wp_rewrite;
+      $wp_rewrite->flush_rules();
+    }
+
+  }
+
+  public function rewrite_url( $wp_rewrite ) {
+    $new_rules = [];
+    foreach($this->routes as $route) {
+      $broken = array_values(array_filter(explode('/', $route['route'])));
+      $new_rules[$broken[0].'/?'] = 'index.php?ampersand_load=true';
+    }
+    $wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
+    return $wp_rewrite->rules;
   }
 
   private function getEnv() {
@@ -261,78 +251,40 @@ class Route {
 
   // --- WordPress API
 
-  public function query_vars( $query_vars ) {
-    array_push($query_vars, 'amp_route');
-    foreach($this->routes as $route){
-      foreach($route['params'] as $param){
-        array_push($query_vars, $param);
+  public function parse_request() {
+
+    $self = $this;
+
+    $dispatcher = FastRoute\simpleDispatcher(function($r) use ($self) {
+      foreach($self->routes as $route) {
+        $r->addRoute($route['methods'], $route['route'], $route['callback'], $route['id']);
       }
-    }
-    return $query_vars;
-  }
+    }, [
+      'routeCollector' => 'Ampersand\\Collector',
+    ]);
 
-  public function flush_rewrite_rules() {
-    $rules = $GLOBALS['wp_rewrite']->wp_rewrite_rules();
-    $need = false;
-    foreach($this->routes as $route) {
-      if ($route['regex'] &&
-        (
-          !isset( $rules[$route['regex']])
-          || $rules[$route['regex']] !== 'index.php?amp_route='.$route['id']
-        )
-      ) {
-        $need = true;
-      }
-    }
+    // Fetch method and URI from somewhere
+    $httpMethod = $_SERVER['REQUEST_METHOD'];
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-    if($need){
-      global $wp_rewrite;
-      $wp_rewrite->flush_rules();
-    }
-
-  }
-
-  public function rewrite_url( $wp_rewrite ) {
-    $new_rules = [];
-
-    foreach($this->routes as $route) {
-      if($route['regex']) $new_rules[$route['regex']] = $route['qstring'];
+    $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+    switch ($routeInfo[0]) {
+      case FastRoute\Dispatcher::NOT_FOUND:
+        // ... 404 Not Found
+        break;
+      case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+        $allowedMethods = $routeInfo[1];
+        // ... 405 Method Not Allowed
+        break;
+      case FastRoute\Dispatcher::FOUND:
+        $handler = $routeInfo[1];
+        $vars = $routeInfo[2];
+        $this->getCallback($handler[1], $handler[0], $vars);
+        break;
     }
 
-    $wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
-    return $wp_rewrite->rules;
-  }
-
-  public function parse_request($wp_query) {
-    if (isset($wp_query->query_vars['amp_route'])){
-
-      $route = $this->getRoute($wp_query->query_vars['amp_route']);
-      $_route = $this->getRouteWithMethod($route, $_SERVER['REQUEST_METHOD']);
-      
-      if($route['id'] == $wp_query->query_vars['amp_route'] && in_array($_SERVER['REQUEST_METHOD'], $route['methods'])){
-        $this->getCallback($route, $wp_query->query_vars);
-      } else if(in_array($_SERVER['REQUEST_METHOD'], $route['methods'])) {
-        $this->getCallback($_route, $wp_query->query_vars);
-      } else {
-        Ampersand::getInstance()->response()->setStatus(404);
-        Ampersand::getInstance()->response()->template('404');
-      }
-
-      Ampersand::getInstance()->run();
-      $this->end();
-
-    } else {
-
-      if($this->getEnv() == 'WP') {
-        $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        if($this->root && str_replace($this->base, '', $url) == '/'){
-          $route = $this->getRoute($this->root);
-          $this->getCallback($route, []);
-          Ampersand::getInstance()->run();
-        }
-      }
-
-    }
+    Ampersand::getInstance()->run();
+    $this->end();
 
   }
 

@@ -6,13 +6,11 @@ use Ampersand\Http\Response;
 class Callback extends Response {
 
   public $request;
-  public $parameters;
   private $args;
 
-  public function __construct($req, $args, $parameters) {
+  public function __construct($req, $args) {
     $this->request = $req;
     $this->args = $args;
-    $this->parameters = $parameters;
     parent::__construct();
   }
 
