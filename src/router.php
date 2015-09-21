@@ -149,22 +149,7 @@ class Route {
       return $route;
     }
   }
-
-  private function getRouteWithMethod($_route, $method) {
-    foreach($this->routes as $route) {
-      if(in_array($method, $route['methods']) && $route['route'] == $_route['route'])
-        return $route;
-    }
-  }
-
-  private function getUrlParameters($params, $query_vars) {
-    $pars = [];
-    foreach($params as $param){
-      array_push($pars, $query_vars[$param]);
-    }
-    return $pars;
-  }
-
+  
   private function runCallback($cb, $query_vars, $res){
 
     if(is_object($cb) && ($cb instanceof Closure)){
