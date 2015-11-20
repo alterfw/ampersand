@@ -262,13 +262,13 @@ class Route {
 
     $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
     switch ($routeInfo[0]) {
-      case \FastRoute\Dispatcher::NOT_FOUND:
-        if($uri != '/404' && $uri != '/404/') {
-          header("HTTP/1.0 404 Not Found");
-          header('Location: '.$this->base.'/404');
-          die();
-        }
-        break;
+      // case \FastRoute\Dispatcher::NOT_FOUND:
+      //   if($uri != '/404' && $uri != '/404/') {
+      //     header("HTTP/1.0 404 Not Found");
+      //     header('Location: '.$this->base.'/404');
+      //     die();
+      //   }
+      //   break;
       case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
         $allowedMethods = $routeInfo[1];
         // ... 405 Method Not Allowed
