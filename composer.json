@@ -19,7 +19,8 @@
     "phpunit/phpunit": "3.x"
   },
   "autoload": {
-    "classmap": ["src/"]
+    "classmap": ["src/"],
+    "files": ["main.php"]
   },
   "scripts": {
     "test": "AMPERSAND_ENV=TEST phpunit --stderr",
