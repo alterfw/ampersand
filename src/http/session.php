@@ -1,6 +1,6 @@
 <?php
 
-namespace Ampersand;
+namespace Ampersand\Http;
 
 class Session {
 

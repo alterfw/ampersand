@@ -1,5 +1,6 @@
 <?php
 
+namespace Ampersand\Helpers;
 use Ampersand\Util\ArrayUtil;
 
 class URL

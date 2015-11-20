@@ -2,7 +2,7 @@
 
 return [
 
-  'views' => 'views',
+  'views' => 'wp-content/themes/development/test/theme/views',
   'cache' => false,
   // Debugging
   'debug' => true,

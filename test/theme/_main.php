@@ -3,7 +3,7 @@
 use Ampersand\Route;
 
 Route::get('/', function(){
-  echo "Hello!";
+  $this->render('index');
 });
 
 Route::get('/hello', function() {
