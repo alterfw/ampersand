@@ -20,7 +20,6 @@
   },
   "autoload": {
     "classmap": ["src/"]
-    }
   },
   "scripts": {
     "test": "AMPERSAND_ENV=TEST phpunit --stderr",
