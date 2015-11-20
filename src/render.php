@@ -1,5 +1,6 @@
 <?php
 
+namespace Ampersand;
 use Ampersand\Config;
 
 class Render {

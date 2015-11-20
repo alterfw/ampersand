@@ -8,7 +8,6 @@
 
 namespace Ampersand;
 
-
 class Collector {
 
   private $routeParser;

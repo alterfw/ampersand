@@ -1,5 +1,7 @@
 <?php
 
+namespace Ampersand;
+
 class Session {
 
   private static $instance;

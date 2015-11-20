@@ -1,8 +1,11 @@
 <?php
 
+namespace Ampersand;
+
 use Ampersand\Http\Request;
 use Ampersand\Http\Response;
 use Ampersand\Callback;
+use Ampersand\Bootstrap;
 
 class Route {
 
@@ -152,7 +155,7 @@ class Route {
 
   private function runCallback($cb, $query_vars, $res){
 
-    if(is_object($cb) && ($cb instanceof Closure)){
+    if(is_object($cb) && ($cb instanceof \Closure)){
 
       $res->bindAndCall($cb);
 
@@ -178,8 +181,8 @@ class Route {
 
     $this->runCallback($handler, $query_vars, $res);
 
-    Ampersand::getInstance()->setRequest($req);
-    Ampersand::getInstance()->setResponse($res);
+    Bootstrap::getInstance()->setRequest($req);
+    Bootstrap::getInstance()->setResponse($res);
 
   }
 
@@ -216,6 +219,7 @@ class Route {
   public function rewrite_url( $wp_rewrite ) {
     $new_rules = [];
     foreach($this->routes as $route) {
+      if($route['route'] == "/") continue;
       $broken = array_values(array_filter(explode('/', $route['route'])));
       $new_rules[$broken[0].'/?'] = 'index.php?ampersand_load=true';
     }
@@ -241,12 +245,12 @@ class Route {
 
     $self = $this;
 
-    $dispatcher = FastRoute\simpleDispatcher(function($r) use ($self) {
+    $dispatcher = \FastRoute\simpleDispatcher(function($r) use ($self) {
       foreach($self->routes as $route) {
         $r->addRoute($route['methods'], $route['route'], $route['callback'], $route['id']);
       }
     }, [
-      'routeCollector' => 'Ampersand\\Collector',
+      'routeCollector' => '\Ampersand\\Collector',
     ]);
 
     // Fetch method and URI from somewhere
@@ -258,25 +262,25 @@ class Route {
 
     $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
     switch ($routeInfo[0]) {
-      case FastRoute\Dispatcher::NOT_FOUND:
+      case \FastRoute\Dispatcher::NOT_FOUND:
         if($uri != '/404' && $uri != '/404/') {
           header("HTTP/1.0 404 Not Found");
           header('Location: '.$this->base.'/404');
           die();
         }
         break;
-      case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+      case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
         $allowedMethods = $routeInfo[1];
         // ... 405 Method Not Allowed
         break;
-      case FastRoute\Dispatcher::FOUND:
+      case \FastRoute\Dispatcher::FOUND:
         $handler = $routeInfo[1];
         $vars = $routeInfo[2];
         $this->getCallback($handler[1], $handler[0], $vars);
         break;
     }
 
-    Ampersand::getInstance()->run();
+    Bootstrap::getInstance()->run();
     $this->end();
 
   }

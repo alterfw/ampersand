@@ -19,8 +19,9 @@
     "phpunit/phpunit": "3.x"
   },
   "autoload": {
-    "psr-4": ["src/"],
-    "files": ["main.php"]
+    "psr-4": {
+      "Ampersand\\": "src/"
+    }
   },
   "scripts": {
     "test": "AMPERSAND_ENV=TEST phpunit --stderr",
