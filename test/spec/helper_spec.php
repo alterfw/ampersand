@@ -1,7 +1,5 @@
 <?php
 
-use Ampersand\Helpers\URL;
-
 class HelperSpec extends PHPUnit_Framework_TestCase {
 
   function test_if_url_has_loaded() {
@@ -13,19 +11,19 @@ class HelperSpec extends PHPUnit_Framework_TestCase {
   }
 
   function test_if_to_returns_root() {
-    $this->assertEquals('http://localhost', URL::to('/'));
+    $this->assertEquals('http://localhost',  Ampersand\Helpers\URL::to('/'));
   }
 
   function test_if_to_returns_path() {
-    $this->assertEquals('http://localhost/hello', URL::to('/hello'));
+    $this->assertEquals('http://localhost/hello',  Ampersand\Helpers\URL::to('/hello'));
   }
 
   function test_url_with_one_parameter() {
-    $this->assertEquals('http://localhost/hello/you', URL::to('/hello/:name', 'you'));
+    $this->assertEquals('http://localhost/hello/you',  Ampersand\Helpers\URL::to('/hello/:name', 'you'));
   }
 
   function test_url_with_two_parameter() {
-    $this->assertEquals('http://localhost/hello/Sergio/there/23', URL::to('/hello/:name/there/:age', 'Sergio', '23'));
+    $this->assertEquals('http://localhost/hello/Sergio/there/23',  Ampersand\Helpers\URL::to('/hello/:name/there/:age', 'Sergio', '23'));
   }
 
 }
