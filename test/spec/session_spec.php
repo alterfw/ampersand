@@ -1,5 +1,7 @@
 <?php
 
+use Ampersand\Http\Session;
+
 class SessionSpec extends PHPUnit_Framework_TestCase {
 
   function test_if_session_has_loaded() {

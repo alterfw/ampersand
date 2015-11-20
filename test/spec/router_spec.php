@@ -1,5 +1,7 @@
 <?php
 
+use Ampersand\Route;
+
 class RouterSpec extends PHPUnit_Framework_TestCase {
 
   function setUP() {

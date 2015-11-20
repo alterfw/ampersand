@@ -1,5 +1,7 @@
 <?php
 
+use Ampersand\Helpers\URL;
+
 class HelperSpec extends PHPUnit_Framework_TestCase {
 
   function test_if_url_has_loaded() {
