@@ -15,7 +15,7 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
   }
 
   function test_if_router_has_loaded() {
-    $this->assertTrue(class_exists('Route'), 'Verify if the Router has been loaded');
+    $this->assertTrue(class_exists('Ampersand\Route'), 'Verify if the Router has been loaded');
   }
 
   // --- Methods

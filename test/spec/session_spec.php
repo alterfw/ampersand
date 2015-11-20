@@ -5,23 +5,23 @@ use Ampersand\Http\Session;
 class SessionSpec extends PHPUnit_Framework_TestCase {
 
   function test_if_session_has_loaded() {
-    $this->assertTrue(class_exists('Session'), 'Verify if the Session class has been loaded');
+    $this->assertTrue(class_exists('Ampersand\Http\Session'), 'Verify if the Session class has been loaded');
   }
 
   function test_if_session_has_flash_method() {
-    $this->assertTrue(method_exists('Session', 'flash'), 'Tests if flash() method exists');
+    $this->assertTrue(method_exists('Ampersand\Http\Session', 'flash'), 'Tests if flash() method exists');
   }
 
   function test_if_session_has_get_method() {
-    $this->assertTrue(method_exists('Session', 'get'), 'Tests if get() method exists');
+    $this->assertTrue(method_exists('Ampersand\Http\Session', 'get'), 'Tests if get() method exists');
   }
 
   function test_if_session_has_set_method() {
-    $this->assertTrue(method_exists('Session', 'set'), 'Tests if set() method exists');
+    $this->assertTrue(method_exists('Ampersand\Http\Session', 'set'), 'Tests if set() method exists');
   }
 
   function test_if_session_has_has_method() {
-    $this->assertTrue(method_exists('Session', 'has'), 'Tests if has() method exists');
+    $this->assertTrue(method_exists('Ampersand\Http\Session', 'has'), 'Tests if has() method exists');
   }
 
   function test_if_session_persist() {
