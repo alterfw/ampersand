@@ -20,14 +20,7 @@
   },
   "autoload": {
     "classmap": ["src/"]
-    },
-    "files": [
-      "main.php",
-      "src/router.php",
-      "src/session.php",
-      "src/renderer.php",
-      "src/helpers/URL.php"
-    ]
+    }
   },
   "scripts": {
     "test": "AMPERSAND_ENV=TEST phpunit --stderr",
