@@ -9,8 +9,8 @@ class Response extends \Slim\Http\Response {
     $this->write(Render::view($template, $data));
   }
 
-  public function template($template){
-    $this->write(Render::template($template));
+  public function template($template, $data){
+    $this->write(Render::template($template, $data));
   }
 
   public function toJSON($data){

@@ -30,9 +30,10 @@ class Render {
     return self::getTwig()->render(str_replace('.', '/', $template).'.html', $data);
   }
 
-  public static function template($template) {
+  public static function template($template, $_data = []) {
+    $data = (object) $_data;
     ob_start();
-    get_template_part($template);
+    include(locate_template($template.'.php'));
     return ob_get_clean();
   }
 
