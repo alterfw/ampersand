@@ -2,7 +2,7 @@
 
 return [
 
-  'views' => 'wp-content/themes/development/test/theme/views',
+  'views' => get_template_directory().'/views',
   'cache' => false,
   // Debugging
   'debug' => true,
