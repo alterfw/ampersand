@@ -11,17 +11,20 @@
   "minimum-stability": "dev",
   "require": {
     "twig/twig": "~1.0",
-    "slim/slim": "~2.0"
+    "slim/slim": "~2.0",
+    "aura/session": "~2.0",
+    "nikic/fast-route": "dev-master"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "3.x"
   },
   "autoload": {
     "psr-4": {
-      "Ampersand\\": "src/",
-      "Ampersand\\Http\\": "src/http"
-    },
-    "files": [
-      "main.php",
-      "src/router.php",
-      "src/renderer.php"
-    ]
+      "Ampersand\\": "src/"
+    }
+  },
+  "scripts": {
+    "test": "AMPERSAND_ENV=TEST phpunit --stderr",
+    "open": "DIP='http://'$(docker-machine ip default); DIP+=':8080'; open $DIP"
   }
 }

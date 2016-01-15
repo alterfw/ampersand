@@ -1,5 +1,7 @@
 <?php
 
+use Ampersand\Route;
+
 class RouterSpec extends PHPUnit_Framework_TestCase {
 
   function setUP() {
@@ -13,7 +15,7 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
   }
 
   function test_if_router_has_loaded() {
-    $this->assertTrue(class_exists('Route'), 'Verify if the Router has been loaded');
+    $this->assertTrue(class_exists('Ampersand\Route'), 'Verify if the Router has been loaded');
   }
 
   // --- Methods
@@ -22,7 +24,8 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
 
     Route::get('/hello', $this->getCallback());
     $target = Route::getRoutes()[0];
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
+    $this->assertCount(1, $target['methods']);
 
   }
 
@@ -30,7 +33,7 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
 
     Route::post('/hello', $this->getCallback());
     $target = Route::getRoutes()[0];
-    $this->assertEquals($target['method'], 'POST');
+    $this->assertContains('POST', $target['methods']);
 
   }
 
@@ -38,7 +41,7 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
 
     Route::put('/hello', $this->getCallback());
     $target = Route::getRoutes()[0];
-    $this->assertEquals($target['method'], 'PUT');
+    $this->assertContains('PUT', $target['methods']);
 
   }
 
@@ -47,7 +50,17 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
     Route::delete('/hello', $this->getCallback());
 
     $target = Route::getRoutes()[0];
-    $this->assertEquals($target['method'], 'DELETE');
+    $this->assertContains('DELETE', $target['methods']);
+
+  }
+
+  function test_map_route() {
+
+    Route::map(['GET', 'POST'], '/hello', $this->getCallback());
+    $target = Route::getRoutes()[0];
+    $this->assertContains('GET', $target['methods']);
+    $this->assertContains('POST', $target['methods']);
+    $this->assertCount(2, $target['methods']);
 
   }
 
@@ -59,12 +72,9 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
     $target = Route::getRoutes()[0];
 
     $this->assertCount(1, Route::getRoutes());
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], str_replace('=', '', base64_encode('GET/')));
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(0, $target['params']);
-    $this->assertFalse($target['regex']);
-    $this->assertFalse($target['qstring']);
 
   }
 
@@ -74,27 +84,21 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
     $target = Route::getRoutes()[0];
     $id = str_replace('=', '', base64_encode('GET/cars'));
 
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(0, $target['params']);
-    $this->assertEquals($target['regex'], 'cars/?');
-    $this->assertEquals($target['qstring'], 'index.php?amp_route='.$id);
 
   }
 
   function test_second_level_route() {
 
-    Route::get('/my/cars', $this->getCallback());
+    Route::get('/my/cars/', $this->getCallback());
     $target = Route::getRoutes()[0];
-    $id = str_replace('=', '', base64_encode('GET/my/cars'));
+    $id = str_replace('=', '', base64_encode('GET/my/cars/'));
 
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(0, $target['params']);
-    $this->assertEquals($target['regex'], 'my/cars/?');
-    $this->assertEquals($target['qstring'], 'index.php?amp_route='.$id);
 
   }
 
@@ -102,15 +106,11 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
 
     Route::get('/car/:model', $this->getCallback());
     $target = Route::getRoutes()[0];
-    $id = str_replace('=', '', base64_encode('GET/car/:model'));
+    $id = str_replace('=', '', base64_encode('GET/car/{model}'));
 
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(1, $target['params']);
-    $this->assertEquals($target['params'][0], 'model');
-    $this->assertEquals($target['regex'], 'car/([a-zA-Z0-9]+)/?');
-    $this->assertEquals($target['qstring'], 'index.php?amp_route='.$id.'&model=$matches[1]');
 
   }
 
@@ -118,16 +118,11 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
 
     Route::get('/bike/:model/:year', $this->getCallback());
     $target = Route::getRoutes()[0];
-    $id = str_replace('=', '', base64_encode('GET/bike/:model/:year'));
+    $id = str_replace('=', '', base64_encode('GET/bike/{model}/{year}'));
 
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(2, $target['params']);
-    $this->assertEquals($target['params'][0], 'model');
-    $this->assertEquals($target['params'][1], 'year');
-    $this->assertEquals($target['regex'], 'bike/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)/?');
-    $this->assertEquals($target['qstring'], 'index.php?amp_route='.$id.'&model=$matches[1]&year=$matches[2]');
 
   }
 
@@ -176,11 +171,9 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
     $target = Route::getRoutes()[0];
     $id = str_replace('=', '', base64_encode('GET/admin/dashboard'));
 
-    $this->assertEquals($target['regex'], 'admin/dashboard/?');
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(0, $target['params']);
 
   }
 
@@ -193,11 +186,9 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
     $target = Route::getRoutes()[0];
     $id = str_replace('=', '', base64_encode('GET/admin/panel/dashboard'));
 
-    $this->assertEquals($target['regex'], 'admin/panel/dashboard/?');
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(0, $target['params']);
 
   }
 
@@ -210,11 +201,9 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
     $target = Route::getRoutes()[0];
     $id = str_replace('=', '', base64_encode('GET/admin/panel/dashboard'));
 
-    $this->assertEquals($target['regex'], 'admin/panel/dashboard/?');
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(0, $target['params']);
 
   }
 
@@ -225,14 +214,11 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
     });
 
     $target = Route::getRoutes()[0];
-    $id = str_replace('=', '', base64_encode('GET/admin/dashboard/:section'));
+    $id = str_replace('=', '', base64_encode('GET/admin/dashboard/{section}'));
 
-    $this->assertEquals($target['regex'], 'admin/dashboard/([a-zA-Z0-9]+)/?');
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(1, $target['params']);
-    $this->assertEquals($target['params'][0], 'section');
 
   }
 
@@ -243,14 +229,11 @@ class RouterSpec extends PHPUnit_Framework_TestCase {
     });
 
     $target = Route::getRoutes()[0];
-    $id = str_replace('=', '', base64_encode('GET/admin/:section/dashboard'));
+    $id = str_replace('=', '', base64_encode('GET/admin/{section}/dashboard'));
 
-    $this->assertEquals($target['regex'], 'admin/([a-zA-Z0-9]+)/dashboard/?');
-    $this->assertEquals($target['method'], 'GET');
+    $this->assertContains('GET', $target['methods']);
     $this->assertEquals($target['id'], $id);
     $this->assertCount(0, $target['middlewares']);
-    $this->assertCount(1, $target['params']);
-    $this->assertEquals($target['params'][0], 'section');
 
   }
 

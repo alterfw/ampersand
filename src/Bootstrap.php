@@ -1,10 +1,12 @@
 <?php
 
+namespace Ampersand;
+
 use Ampersand\Http\Request;
 use Ampersand\Http\Response;
 use Ampersand\Config;
 
-class Ampersand {
+class Bootstrap {
 
   protected static $instance;
   private $request;

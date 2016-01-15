@@ -1,4 +1,4 @@
 <?php
 
-define('AMPERSAND_ENV', 'TEST');
+require "lib/wp_functions.php";
 require "vendor/autoload.php";

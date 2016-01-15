@@ -1,2 +1,8 @@
 /vendor/
 composer.lock
+.idea
+.couscous
+/_main.php
+/index.php
+/functions.php
+/style.css
