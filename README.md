@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/alterfw/ampersand.svg)](https://travis-ci.org/alterfw/ampersand)
 
-A microframework for Wordpress based on [Slim](http://www.slimframework.com/).
+Routes and Views for WordPress Applications, based on [Slim](http://www.slimframework.com/).
 
 ## Instalation
 
