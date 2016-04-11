@@ -15,11 +15,6 @@ Require the composer autoload file into your `functions.php`:
 require "vendor/autoload.php";
 ```
 
-## Documentation
-
-You can read more about how Ampersand works in the [documentation page](http://alterfw.github.io/ampersand/docs/).
-
-
 ## Contributing
 
 This project doesn't have an styleguide yet but you should follow the existing code.
