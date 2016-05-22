@@ -228,6 +228,7 @@ class Route {
   }
 
   private function getEnv() {
+    if(defined('ALTER_CLI_RUNNER')) return 'CLI';
     $by_env = getenv("AMPERSAND_ENV");
     if(!empty($by_env) && !defined('AMPERSAND_ENV')) define('AMPERSAND_ENV', $by_env);
     return defined('AMPERSAND_ENV') ? AMPERSAND_ENV : 'WP';
