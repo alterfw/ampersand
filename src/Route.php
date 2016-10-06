@@ -246,6 +246,7 @@ class Route {
 
     $self = $this;
 
+    $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
     $dispatcher = \FastRoute\simpleDispatcher(function($r) use ($self) {
       foreach($self->routes as $route) {
         $r->addRoute($route['methods'], $route['route'], $route['callback'], $route['id']);
@@ -256,7 +257,7 @@ class Route {
 
     // Fetch method and URI from somewhere
     $httpMethod = $_SERVER['REQUEST_METHOD'];
-    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $uri = $request->getPathInfo();
 
     if(strpos($uri, '/wp-admin') > -1) return;
 
