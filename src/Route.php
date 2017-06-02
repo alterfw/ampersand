@@ -257,7 +257,7 @@ class Route {
 
     // Fetch method and URI from somewhere
     $httpMethod = $_SERVER['REQUEST_METHOD'];
-    $uri = $request->getPathInfo();
+    $uri = $request->getRequestUri();
 
     if(strpos($uri, '/wp-admin') > -1) return;
 
