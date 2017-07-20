@@ -259,6 +259,12 @@ class Route {
     $httpMethod = $_SERVER['REQUEST_METHOD'];
     $uri = $request->getRequestUri();
 
+    // Strip query string (?foo=bar) and decode URI
+    if (false !== $pos = strpos($uri, '?')) {
+        $uri = substr($uri, 0, $pos);
+    }
+    $uri = rawurldecode($uri);
+
     if(strpos($uri, '/wp-admin') > -1) return;
 
     if($uri == '/404' || $uri == '/404/')
