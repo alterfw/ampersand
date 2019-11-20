@@ -10,6 +10,7 @@ use Ampersand\Bootstrap;
 class Route {
 
   private $routes = [];
+  private $ignoredRoutes = [];
   private $root = false;
   private $base = '';
   private static $routeInstance;
@@ -37,6 +38,10 @@ class Route {
 
   public static function group() {
     self::instance()->addGroup(func_get_args());
+  }
+
+  public static function ignore($path) {
+    self::instance()->ignoreRoute($path);
   }
 
   public static function get(){
@@ -115,6 +120,10 @@ class Route {
     $this->prefix = '';
     $this->middlewares = [];
 
+  }
+
+  private function ignoreRoute($path) {
+    array_push($this->ignoredRoutes, $path);
   }
 
   private function addRoute($method, $parameters) {
@@ -265,6 +274,7 @@ class Route {
     }
     $uri = rawurldecode($uri);
 
+    if(in_array($uri, $this->ignoredRoutes)) return;
     if(strpos($uri, '/wp-admin') > -1) return;
 
     if($uri == '/404' || $uri == '/404/')
