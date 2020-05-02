@@ -4,6 +4,7 @@ namespace Ampersand;
 use Ampersand\Config;
 use Ampersand\Http\Session;
 use Ampersand\Helpers\URL;
+use Ampersand\Helpers\WP;
 
 class Render {
 
@@ -21,6 +22,7 @@ class Render {
       // Add globals
       $twig->addGlobal('session', Session::getInstance());
       $twig->addGlobal('url', new URL());
+      $twig->addGlobal('wp', new WP());
       self::$twig = $twig;
     }
     return self::$twig;
